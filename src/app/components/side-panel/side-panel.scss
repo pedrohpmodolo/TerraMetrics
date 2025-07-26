@@ -1,0 +1,13 @@
+// This special selector allows us to style the inner parts of the ngx-charts component
+:host ::ng-deep .ngx-charts {
+
+  // This targets all text elements (like axis labels and numbers) and makes them white
+  text {
+    fill: #ffffff;
+  }
+
+  // This makes the grid lines a light gray so they are visible
+  .grid-line, .tick line {
+    stroke: rgba(255, 255, 255, 0.2);
+  }
+}

@@ -1,0 +1,89 @@
+<div class="pt-24 text-white min-h-screen bg-black">
+  <div class="container mx-auto px-4 pb-24">
+    
+    <div class="text-center mb-12">
+      <h1 class="text-4xl font-bold">My Dashboard</h1>
+      <p class="text-lg text-gray-400 mt-2" *ngIf="authService.currentUser as user">
+        Welcome back, {{ user.displayName || 'User' }}!
+      </p>
+    </div>
+
+    <ng-container *ngIf="(dashboardItems$ | async) as items; else noItems">
+      <div *ngIf="items.length > 0; else noItems">
+        <!-- Main grid for all saved items -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <!-- Loop through each saved item -->
+          <div *ngFor="let item of items" class="bg-gray-800 bg-opacity-50 p-6 rounded-lg flex flex-col">
+            
+            <!-- Item Header -->
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold text-sky-400">
+                {{ item.savedItem.country.name }}
+                <!-- If it's a single chart, show the indicator name as a subtitle -->
+                <span *ngIf="item.savedItem.type === 'chart'" class="text-lg text-gray-300 block">{{ item.savedItem.indicator?.name }}</span>
+              </h2>
+              <button (click)="deleteItem(item.savedItem.id)" class="text-red-500 hover:text-red-400 font-bold">
+                DELETE
+              </button>
+            </div>
+
+            <!-- Indicator Pills (only show for saved countries) -->
+            <div *ngIf="item.savedItem.type === 'country'" class="flex flex-wrap gap-2 mb-4">
+              <button 
+                *ngFor="let indicator of item.indicators"
+                (click)="loadChart(item, indicator.id, indicator.name)"
+                class="text-xs font-semibold px-3 py-1 rounded-full transition-colors"
+                [ngClass]="item.activeIndicatorName === indicator.name ? 'bg-sky-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'"
+              >
+                {{ indicator.name }}
+              </button>
+            </div>
+
+            <!-- Chart Display Area -->
+            <div class="flex-grow min-h-[300px]">
+              <div *ngIf="item.activeChartData" class="bg-gray-900 p-4 rounded-md">
+                <ngx-charts-line-chart
+                  [view]="[500, 250]"
+                  [results]="item.activeChartData"
+                  [xAxis]="true"
+                  [yAxis]="true"
+                  [showXAxisLabel]="false"
+                  [showYAxisLabel]="false"
+                  [scheme]="colorScheme">
+                </ngx-charts-line-chart>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- AI Chat Assistant -->
+        <div class="mt-16 max-w-4xl mx-auto">
+          <h2 class="text-3xl font-bold text-center mb-8">Dashboard AI Assistant</h2>
+          <div class="bg-gray-900 p-4 rounded-lg h-64 overflow-y-auto mb-4">
+            <div *ngIf="chatHistory.length === 0" class="text-center text-gray-400 h-full flex items-center justify-center">
+              <p>Ask a question about your dashboard, like "What other countries should I follow?"</p>
+            </div>
+            <div *ngFor="let message of chatHistory">
+              <div *ngIf="message.role === 'user'" class="text-right mb-2"><span class="bg-sky-600 text-white px-4 py-2 rounded-lg inline-block">{{ message.content }}</span></div>
+              <div *ngIf="message.role === 'assistant'" class="text-left mb-2"><pre class="bg-gray-700 text-white px-4 py-2 rounded-lg inline-block whitespace-pre-wrap font-sans">{{ message.content }}</pre></div>
+            </div>
+            <div *ngIf="isChatLoading" class="text-left"><span class="bg-gray-700 text-white px-4 py-2 rounded-lg inline-block">...</span></div>
+          </div>
+          <form (ngSubmit)="sendChatMessage()" class="flex gap-4">
+            <input type="text" [(ngModel)]="chatInput" name="chatInput" placeholder="Type your question here..." class="flex-grow bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500" [disabled]="isChatLoading">
+            <button type="submit" [disabled]="isChatLoading || !chatInput.trim()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-lg transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed">Send</button>
+          </form>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-template #noItems>
+      <div class="text-center text-gray-400 mt-16">
+        <p class="text-xl">Your dashboard is empty.</p>
+        <p>Go to the main page, select a country, and click "Save" to add items.</p>
+      </div>
+    </ng-template>
+
+  </div>
+</div>

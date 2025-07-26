@@ -1,0 +1,92 @@
+<div class="pt-24 text-white min-h-screen bg-black">
+  <div class="container mx-auto px-4 pb-24">
+    
+    <!-- Page Title & Reset Button -->
+    <div class="text-center mb-12 relative">
+      <h1 class="text-4xl font-bold">Economic Comparison</h1>
+      <p class="text-lg text-gray-400 mt-2">Select two countries to see how they stack up.</p>
+      <!-- --- NEW: Reset Button --- -->
+      <button *ngIf="selectedCountry1 || selectedCountry2" (click)="resetComparison()" class="absolute top-0 right-0 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
+        Reset
+      </button>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <!-- COUNTRY 1 COLUMN -->
+      <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg">
+        <div *ngIf="!selectedCountry1; else country1Selected">
+          <h3 class="text-xl font-semibold mb-4">Select First Country</h3>
+          <input type="text" placeholder="Search..." (input)="onSearch1($event)" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+          <ul class="mt-2 max-h-60 overflow-y-auto">
+            <li *ngFor="let country of filteredCountries1$ | async" (click)="selectCountry1(country)" class="py-2 px-2 hover:bg-sky-600 rounded-md cursor-pointer">{{ country.name }}</li>
+          </ul>
+        </div>
+        <ng-template #country1Selected><h2 class="text-3xl font-bold text-sky-400">{{ selectedCountry1?.name }}</h2></ng-template>
+      </div>
+
+      <!-- COUNTRY 2 COLUMN -->
+      <div class="bg-gray-800 bg-opacity-50 p-6 rounded-lg">
+        <div *ngIf="!selectedCountry2; else country2Selected">
+          <h3 class="text-xl font-semibold mb-4">Select Second Country</h3>
+          <input type="text" placeholder="Search..." (input)="onSearch2($event)" class="w-full bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+          <ul class="mt-2 max-h-60 overflow-y-auto">
+            <li *ngFor="let country of filteredCountries2$ | async" (click)="selectCountry2(country)" class="py-2 px-2 hover:bg-sky-600 rounded-md cursor-pointer">{{ country.name }}</li>
+          </ul>
+        </div>
+        <ng-template #country2Selected><h2 class="text-3xl font-bold text-sky-400">{{ selectedCountry2?.name }}</h2></ng-template>
+      </div>
+    </div>
+
+    <!-- AI Analysis Section -->
+    <div *ngIf="selectedCountry1 && selectedCountry2 && !analysisResult" class="mt-12 text-center">
+      <button (click)="analyzeWithAI()" [disabled]="isLoadingAnalysis" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-3 px-6 rounded-lg text-lg transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed">
+        <span *ngIf="!isLoadingAnalysis">Analyze with AI</span>
+        <span *ngIf="isLoadingAnalysis">Analyzing...</span>
+      </button>
+    </div>
+
+    <!-- AI Result Display -->
+    <div *ngIf="isLoadingAnalysis" class="mt-8 text-center"><p class="text-lg text-gray-400">Please wait...</p></div>
+    <div *ngIf="analysisResult" class="mt-8 bg-gray-800 bg-opacity-50 p-6 rounded-lg max-w-4xl mx-auto">
+      <h3 class="text-2xl font-bold mb-4 text-sky-400">AI Analysis</h3>
+      <pre class="text-gray-300 whitespace-pre-wrap leading-relaxed font-mono bg-gray-900 p-4 rounded-md overflow-x-auto">{{ analysisResult }}</pre>
+    </div>
+
+    <!-- --- NEW: Chat Interface --- -->
+    <div *ngIf="analysisResult" class="mt-8 max-w-4xl mx-auto">
+      <h3 class="text-2xl font-bold mb-4 text-sky-400">Ask a Follow-up Question</h3>
+      <!-- Chat History -->
+      <div class="bg-gray-900 p-4 rounded-lg h-64 overflow-y-auto mb-4">
+        <div *ngFor="let message of chatHistory">
+          <div *ngIf="message.role === 'user'" class="text-right mb-2">
+            <span class="bg-sky-600 text-white px-4 py-2 rounded-lg inline-block">{{ message.content }}</span>
+          </div>
+          <!-- Do not show the initial assistant analysis in the chat history -->
+          <div *ngIf="message.role === 'assistant' && message.content !== analysisResult" class="text-left mb-2">
+            <pre class="bg-gray-700 text-white px-4 py-2 rounded-lg inline-block whitespace-pre-wrap font-sans">{{ message.content }}</pre>
+          </div>
+        </div>
+        <!-- Show a loading indicator for the chat response -->
+        <div *ngIf="isChatLoading" class="text-left">
+            <span class="bg-gray-700 text-white px-4 py-2 rounded-lg inline-block">...</span>
+        </div>
+      </div>
+      <!-- Chat Input Form -->
+      <form (ngSubmit)="sendChatMessage()" class="flex gap-4">
+        <input 
+          type="text"
+          [(ngModel)]="chatInput"
+          name="chatInput"
+          placeholder="Type your question here..."
+          class="flex-grow bg-gray-700 border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          [disabled]="isChatLoading"
+        >
+        <button type="submit" [disabled]="isChatLoading || !chatInput.trim()" class="bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-lg transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed">
+          Send
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>

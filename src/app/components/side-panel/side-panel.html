@@ -1,0 +1,55 @@
+<div *ngIf="isPanelOpen$ | async" class="fixed top-0 right-0 h-full w-96 bg-gray-900 bg-opacity-80 backdrop-blur-md text-white shadow-lg z-20 p-6 flex flex-col">
+  <ng-container *ngIf="(selectedCountry$ | async) as country; else countryList">
+    <!-- DETAIL VIEW -->
+    <div class="flex-shrink-0">
+      <div class="flex justify-between items-center mb-4">
+        <!-- --- NEW: Go Back Button --- -->
+        <button (click)="goBack()" class="text-gray-400 hover:text-white transition-colors flex items-center space-x-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+          <span>Back</span>
+        </button>
+        <button (click)="closePanel()" class="text-gray-400 hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+        </button>
+      </div>
+      <h2 class="text-2xl font-bold text-center mb-4">{{ country.name }}</h2>
+      <button (click)="saveCountry()" class="w-full bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 px-4 rounded-lg transition-colors mb-4">
+        Save Country to Dashboard
+      </button>
+      <div *ngIf="saveMessage" class="text-center text-green-400 mb-4">{{ saveMessage }}</div>
+    </div>
+    <div class="flex-grow overflow-y-auto">
+      <h3 class="text-lg font-semibold mb-2 text-sky-300">Available Indicators</h3>
+      <ul>
+        <li *ngFor="let indicator of indicators$ | async" (click)="selectIndicator(indicator)" class="py-2 px-1 hover:bg-gray-700 rounded-md cursor-pointer">{{ indicator.name }}</li>
+      </ul>
+      <div *ngIf="selectedIndicator && (chartData$ | async) as chartData" class="mt-8">
+        <div class="flex justify-between items-center mb-4">
+          <h4 class="text-md font-semibold">{{ selectedIndicator.name }}</h4>
+          <button (click)="saveChart()" class="bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold py-1 px-2 rounded-md transition-colors">
+            Save Chart
+          </button>
+        </div>
+        <ngx-charts-line-chart [view]="[320, 250]" [results]="chartData" [xAxis]="true" [yAxis]="true" [showXAxisLabel]="true" [showYAxisLabel]="true" xAxisLabel="Year" yAxisLabel="Value" [scheme]="colorScheme"></ngx-charts-line-chart>
+      </div>
+    </div>
+  </ng-container>
+  <!-- LIST VIEW -->
+  <ng-template #countryList>
+    <div class="flex-shrink-0 flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold">Select a Country</h2>
+      <button (click)="closePanel()" class="text-gray-400 hover:text-white transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+    </div>
+    <div class="mb-4">
+      <input type="text" placeholder="Search for a country..." (input)="onSearch($event)" class="w-full bg-gray-800 border border-gray-600 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-500">
+    </div>
+    <div class="flex-grow overflow-y-auto">
+      <div *ngIf="!(filteredCountries$ | async)"><p>Loading countries...</p></div>
+      <ul>
+        <li *ngFor="let country of filteredCountries$ | async" (click)="selectCountry(country)" class="py-2 px-1 hover:bg-gray-700 rounded-md cursor-pointer">{{ country.name }}</li>
+      </ul>
+    </div>
+  </ng-template>
+</div>

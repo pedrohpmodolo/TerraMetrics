@@ -1,0 +1,42 @@
+<header class="fixed top-0 left-0 w-full bg-black bg-opacity-50 backdrop-blur-sm text-white p-4 z-10">
+  <nav class="container mx-auto flex justify-between items-center">
+    <a routerLink="/" class="text-2xl font-bold tracking-wider">
+      TerraMetrics
+    </a>
+
+    <ul class="flex items-center space-x-6">
+      <!-- This is the new conditional logic -->
+      <ng-container *ngIf="user$ | async as user; else loggedOut">
+        <!-- Show these links if the user IS logged in -->
+        <!-- --- UPDATED: Welcome Message moved here --- -->
+        <li>
+          <span class="text-gray-300">Hello, {{ user.displayName || 'User' }}!</span>
+        </li>
+        <li>
+          <a routerLink="/compare" class="hover:text-sky-400 transition-colors duration-300">Compare</a>
+        </li>
+        <li>
+          <a routerLink="/dashboard" class="hover:text-sky-400 transition-colors duration-300">My Dashboard</a>
+        </li>
+        <li>
+          <button (click)="logout()" class="bg-red-600 hover:bg-red-500 transition-colors duration-300 px-4 py-2 rounded-md font-semibold">
+            Logout
+          </button>
+        </li>
+      </ng-container>
+
+      <ng-template #loggedOut>
+        <!-- Show these links if the user IS NOT logged in -->
+        <li>
+          <a routerLink="/compare" class="hover:text-sky-400 transition-colors duration-300">Compare</a>
+        </li>
+        <li>
+          <a routerLink="/login" class="bg-sky-600 hover:bg-sky-500 transition-colors duration-300 px-4 py-2 rounded-md font-semibold">
+            Login
+          </a>
+        </li>
+      </ng-template>
+
+    </ul>
+  </nav>
+</header>

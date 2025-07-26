@@ -27,10 +27,18 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "src/assets",
+                "output": "/assets/"
               }
             ],
             "styles": [
               "src/styles.scss"
+            ],
+            "allowedCommonJsDependencies": [
+              "gsap"
             ]
           },
           "configurations": {
@@ -94,5 +102,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "2e070767-6d67-44ca-9255-cae168973750"
   }
 }
